@@ -96,10 +96,12 @@ const TodoList = () => {
           >
             <Button
               onClick={() => toggleTodo(todo.id)}
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className={`min-w-[2rem] h-8 p-0 ${
-                todo.completed ? 'text-mint-600' : 'text-gray-400'
+              className={`min-w-[2rem] h-8 p-0 rounded-full border ${
+                todo.completed 
+                  ? 'border-mint-600 text-mint-600 bg-mint-50' 
+                  : 'border-gray-300 text-gray-400 hover:border-mint-500 hover:text-mint-500'
               }`}
             >
               <Check className={`w-4 h-4 transition-all ${
