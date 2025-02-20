@@ -91,22 +91,22 @@ const TodoList = () => {
         {filteredTodos.map(todo => (
           <div
             key={todo.id}
-            className={`todo-item flex items-center gap-2 p-3 rounded-lg bg-white/40 
-              transition-all duration-200 ${todo.completed ? 'completed' : ''}`}
+            className={`todo-item flex items-center gap-2 p-3 rounded-lg bg-white shadow-sm
+              transition-all duration-200 ${todo.completed ? 'bg-mint-50' : ''}`}
           >
             <Button
               onClick={() => toggleTodo(todo.id)}
               variant="ghost"
               size="sm"
               className={`min-w-[2rem] h-8 p-0 ${
-                todo.completed ? 'text-mint-500' : 'text-gray-400'
+                todo.completed ? 'text-mint-600' : 'text-gray-400'
               }`}
             >
-              <Check className={`w-4 h-4 transition-opacity ${
+              <Check className={`w-4 h-4 transition-all ${
                 todo.completed ? 'opacity-100' : 'opacity-0'
               }`} />
             </Button>
-            <span className={`flex-1 ${todo.completed ? 'line-through text-gray-500' : ''}`}>
+            <span className={`flex-1 ${todo.completed ? 'line-through text-mint-700' : 'text-gray-700'}`}>
               {todo.text}
             </span>
             <Button

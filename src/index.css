@@ -30,7 +30,7 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-white/30 backdrop-blur-sm border border-white/40 shadow-xl;
+    @apply bg-white/80 backdrop-blur-sm border border-white/50 shadow-lg;
   }
 }
 
@@ -46,7 +46,7 @@
   left: 50%;
   width: 120%;
   height: 120%;
-  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+  background: radial-gradient(circle, rgba(42,157,143,0.1) 0%, rgba(255,255,255,0) 70%);
   transform: translate(-50%, -50%) scale(0);
   transition: transform 0.3s ease-out;
 }
@@ -61,5 +61,4 @@
 
 .todo-item.completed {
   transform: translateX(8px);
-  opacity: 0.6;
 }

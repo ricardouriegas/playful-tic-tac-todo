@@ -147,9 +147,10 @@ const TicTacToe = () => {
             className={`
               h-24 w-full rounded-lg text-3xl font-bold
               transition-all duration-200 cell-hover
-              ${cell ? 'bg-white/60' : 'bg-white/40'}
-              ${gameState === 'playing' && !cell && isPlayerTurn ? 'hover:bg-white/50' : ''}
-              ${cell === 'X' ? 'text-mint-500' : 'text-gray-700'}
+              ${cell ? 'bg-white shadow-md' : 'bg-white/90'}
+              ${gameState === 'playing' && !cell && isPlayerTurn ? 'hover:bg-mint-50' : ''}
+              ${cell === 'X' ? 'text-mint-600' : 'text-gray-800'}
+              border-2 border-mint-100
             `}
             disabled={!isPlayerTurn || gameState !== 'playing'}
           >
