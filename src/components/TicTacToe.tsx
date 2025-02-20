@@ -71,50 +71,55 @@ const TicTacToe = () => {
     return -1;
   };
 
+  const checkGameState = (squares: CellValue[]) => {
+    const winner = checkWinner(squares);
+    if (winner) {
+      setGameState('won');
+      toast({
+        title: winner === 'X' ? '¡Has ganado!' : '¡La computadora ha ganado!',
+        className: 'bg-mint-500 text-white',
+      });
+      return true;
+    }
+    if (isBoardFull(squares)) {
+      setGameState('draw');
+      toast({
+        title: '¡Empate!',
+        description: 'El juego ha terminado en empate.',
+        className: 'bg-gray-500 text-white',
+      });
+      return true;
+    }
+    return false;
+  };
+
   const handleClick = (index: number) => {
     if (board[index] || !isPlayerTurn || gameState !== 'playing') return;
 
     const newBoard = [...board];
     newBoard[index] = 'X';
     setBoard(newBoard);
-    setIsPlayerTurn(false);
+    
+    if (!checkGameState(newBoard)) {
+      setIsPlayerTurn(false);
+    }
   };
 
   useEffect(() => {
     if (!isPlayerTurn && gameState === 'playing') {
-      const checkGameState = () => {
-        const winner = checkWinner(board);
-        if (winner) {
-          setGameState('won');
-          toast({
-            title: winner === 'X' ? '¡Has ganado!' : '¡La computadora ha ganado!',
-            className: 'bg-mint-500 text-white',
-          });
-          return true;
-        }
-        if (isBoardFull(board)) {
-          setGameState('draw');
-          toast({
-            title: '¡Empate!',
-            description: 'El juego ha terminado en empate.',
-            className: 'bg-gray-500 text-white',
-          });
-          return true;
-        }
-        return false;
-      };
-
-      if (!checkGameState()) {
-        setTimeout(() => {
-          const aiMove = getAIMove(board);
-          if (aiMove !== -1) {
-            const newBoard = [...board];
-            newBoard[aiMove] = 'O';
-            setBoard(newBoard);
+      setTimeout(() => {
+        const aiMove = getAIMove(board);
+        if (aiMove !== -1) {
+          const newBoard = [...board];
+          newBoard[aiMove] = 'O';
+          setBoard(newBoard);
+          
+          // Verificar el estado del juego inmediatamente después del movimiento de la PC
+          if (!checkGameState(newBoard)) {
+            setIsPlayerTurn(true);
           }
-          setIsPlayerTurn(true);
-        }, 500);
-      }
+        }
+      }, 500);
     }
   }, [board, isPlayerTurn, gameState]);
 
