@@ -2,15 +2,17 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Users, Monitor } from 'lucide-react';
 
 type CellValue = 'X' | 'O' | null;
 type GameState = 'playing' | 'won' | 'draw';
+type GameMode = 'pvp' | 'cpu';
 
 const TicTacToe = () => {
   const [board, setBoard] = useState<CellValue[]>(Array(9).fill(null));
-  const [isPlayerTurn, setIsPlayerTurn] = useState(true);
+  const [isXNext, setIsXNext] = useState(true);
   const [gameState, setGameState] = useState<GameState>('playing');
+  const [gameMode, setGameMode] = useState<GameMode | null>(null);
   const { toast } = useToast();
 
   const checkWinner = (squares: CellValue[]): CellValue | null => {
@@ -75,8 +77,11 @@ const TicTacToe = () => {
     const winner = checkWinner(squares);
     if (winner) {
       setGameState('won');
+      const winMessage = gameMode === 'cpu' 
+        ? (winner === 'X' ? '¡Has ganado!' : '¡La computadora ha ganado!')
+        : `¡Ha ganado el jugador ${winner}!`;
       toast({
-        title: winner === 'X' ? '¡Has ganado!' : '¡La computadora ha ganado!',
+        title: winMessage,
         className: 'bg-mint-500 text-white',
       });
       return true;
@@ -94,19 +99,21 @@ const TicTacToe = () => {
   };
 
   const handleClick = (index: number) => {
-    if (board[index] || !isPlayerTurn || gameState !== 'playing') return;
+    if (board[index] || gameState !== 'playing' || !gameMode) return;
+    
+    if (gameMode === 'cpu' && !isXNext) return;
 
     const newBoard = [...board];
-    newBoard[index] = 'X';
+    newBoard[index] = isXNext ? 'X' : 'O';
     setBoard(newBoard);
     
     if (!checkGameState(newBoard)) {
-      setIsPlayerTurn(false);
+      setIsXNext(!isXNext);
     }
   };
 
   useEffect(() => {
-    if (!isPlayerTurn && gameState === 'playing') {
+    if (gameMode === 'cpu' && !isXNext && gameState === 'playing') {
       setTimeout(() => {
         const aiMove = getAIMove(board);
         if (aiMove !== -1) {
@@ -114,20 +121,48 @@ const TicTacToe = () => {
           newBoard[aiMove] = 'O';
           setBoard(newBoard);
           
-          // Verificar el estado del juego inmediatamente después del movimiento de la PC
           if (!checkGameState(newBoard)) {
-            setIsPlayerTurn(true);
+            setIsXNext(true);
           }
         }
       }, 500);
     }
-  }, [board, isPlayerTurn, gameState]);
+  }, [board, isXNext, gameState, gameMode]);
 
   const resetGame = () => {
     setBoard(Array(9).fill(null));
-    setIsPlayerTurn(true);
+    setIsXNext(true);
     setGameState('playing');
   };
+
+  const selectGameMode = (mode: GameMode) => {
+    setGameMode(mode);
+    resetGame();
+  };
+
+  if (!gameMode) {
+    return (
+      <div className="w-full max-w-md mx-auto p-6 glass-panel rounded-2xl">
+        <h2 className="text-2xl font-semibold mb-6 text-center">Selecciona el modo de juego</h2>
+        <div className="space-y-4">
+          <Button
+            onClick={() => selectGameMode('pvp')}
+            className="w-full bg-mint-500 hover:bg-mint-600 text-white h-16"
+          >
+            <Users className="w-6 h-6 mr-2" />
+            Jugador vs Jugador
+          </Button>
+          <Button
+            onClick={() => selectGameMode('cpu')}
+            className="w-full bg-mint-500 hover:bg-mint-600 text-white h-16"
+          >
+            <Monitor className="w-6 h-6 mr-2" />
+            Jugador vs Computadora
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md mx-auto p-6 glass-panel rounded-2xl">
@@ -135,8 +170,14 @@ const TicTacToe = () => {
         <h2 className="text-2xl font-semibold mb-2">TicTacToe</h2>
         <p className="text-sm text-gray-600">
           {gameState === 'playing' 
-            ? (isPlayerTurn ? 'Tu turno' : 'Turno de la computadora')
-            : (gameState === 'draw' ? 'Empate' : `${checkWinner(board) === 'X' ? '¡Has ganado!' : '¡La computadora ha ganado!'}`)}
+            ? (gameMode === 'cpu' 
+                ? (isXNext ? 'Tu turno' : 'Turno de la computadora')
+                : `Turno del jugador ${isXNext ? 'X' : 'O'}`)
+            : (gameState === 'draw' 
+                ? 'Empate' 
+                : (gameMode === 'cpu' 
+                    ? (checkWinner(board) === 'X' ? '¡Has ganado!' : '¡La computadora ha ganado!')
+                    : `¡Ha ganado el jugador ${checkWinner(board)}!`))}
         </p>
       </div>
       <div className="grid grid-cols-3 gap-2 mb-4">
@@ -148,23 +189,32 @@ const TicTacToe = () => {
               h-24 w-full rounded-lg text-3xl font-bold
               transition-all duration-200 cell-hover
               ${cell ? 'bg-white shadow-md' : 'bg-white/90'}
-              ${gameState === 'playing' && !cell && isPlayerTurn ? 'hover:bg-mint-50' : ''}
+              ${gameState === 'playing' && !cell && (gameMode === 'pvp' || isXNext) ? 'hover:bg-mint-50' : ''}
               ${cell === 'X' ? 'text-mint-600' : 'text-gray-800'}
               border-2 border-mint-100
             `}
-            disabled={!isPlayerTurn || gameState !== 'playing'}
+            disabled={gameState !== 'playing' || (gameMode === 'cpu' && !isXNext)}
           >
             <span className="animate-scale-in">{cell}</span>
           </button>
         ))}
       </div>
-      <Button
-        onClick={resetGame}
-        className="w-full bg-mint-500 hover:bg-mint-600 text-white"
-      >
-        <RotateCcw className="w-4 h-4 mr-2" />
-        Reiniciar juego
-      </Button>
+      <div className="space-y-2">
+        <Button
+          onClick={resetGame}
+          className="w-full bg-mint-500 hover:bg-mint-600 text-white"
+        >
+          <RotateCcw className="w-4 h-4 mr-2" />
+          Reiniciar juego
+        </Button>
+        <Button
+          onClick={() => setGameMode(null)}
+          variant="outline"
+          className="w-full"
+        >
+          Cambiar modo de juego
+        </Button>
+      </div>
     </div>
   );
 };
